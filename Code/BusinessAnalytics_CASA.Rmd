@@ -1,0 +1,155 @@
+---
+title: "BusinessAnalytics_CASA"
+author: "Chaytanya Kumar"
+date: "2022-12-01"
+output: html_document
+---
+
+```{r Libraries}
+
+library(readr)
+library(tidyverse)
+```
+
+## Loading Dataset 
+```{r Dataset}
+Crime<-read_csv("/Users/chaytanya/Documents/Analytics /Crimes.csv")
+head(Crime)
+#View(Crime)
+Accident<-read_csv("/Users/chaytanya/Documents/Analytics /Accidents.csv")
+head(Accident)
+
+
+```
+## Descriptive Summary
+```{r Summary}
+summary(Crime)
+dim(Crime)
+summary(Accident)
+dim (Accident)
+```
+
+## Exploratory and Descriptive Analysis
+
+
+```{r Accident DayParting}
+
+ggplot(data = Accident) +  
+  geom_bar(mapping = aes(x = Dayparting, fill = Dayparting))+
+  xlab("DayParting") +
+  ylab("Count of Accidents") +
+  ggtitle("Accidents vs DayParting")
+
+```
+
+
+```{r Crime DayParting}
+ggplot(data = Crime) + 
+geom_bar(mapping = aes(x = Dayparting, fill = Dayparting))+
+  xlab("DayParting") +
+  ylab("Count of crimes") +
+  ggtitle("Crimes vs DayParting")
+
+```
+
+
+## Comparision: Total no. of Accidents and Crimes Year-wise
+
+```{r Accident}
+ggplot(data = Crime) +  
+  geom_bar(mapping = aes(x = Year, fill = Year),fill='red')+
+  xlab("Year") +
+  ylab("Count of Accident") +
+  ggtitle("Crimes commited in each year")
+
+
+ggplot(data = Crime) +  
+  geom_bar(mapping = aes(x = Year, fill = Year),fill='red')+
+  xlab("Year") +
+  ylab("Count of crimes") +
+  ggtitle("Crimes commited in each year")
+```
+
+
+```{r Crime}
+
+ggplot(data = Crime)+
+  geom_bar(mapping = aes(x = Offense, fill=Offense))+
+  scale_x_discrete(guide=guide_axis(angle = 45))+
+    xlab("Offense Type")+
+  ylab("Count of Offenses")+
+  ggtitle("Count of Types of Offenses")
+
+     
+
+bp<- ggplot(Crime, aes(x="Category", fill=Category))+
+  geom_bar(width = .5) 
+bp
+```
+
+
+
+```{r Crime Date}
+
+
+ Crime%>%
+  mutate(Date=as.Date(Date,tryFormats = c("%m/%d/%y")))->a1
+
+a1$Date1 <- format(as.Date(a1$Date), "%Y/%m")
+a1$Date1<-sub("$","/01",a1$Date1)
+
+as.Date(a1$Date1,tryFormats = c("%Y/%m/%d") )
+
+a1%>%
+  group_by(Date1)%>%
+  mutate(Crime_count = n()) %>%
+  ungroup() %>%
+  dplyr::select(Date1, Crime_count) %>%
+  unique() ->a1
+
+
+
+a1%>%
+mutate(G150=as.factor(if_else(Crime_count>2700,"More","Less"))) %>%
+  filter(Date1<"2021/01/01", Date1>"2017/12/31")%>%
+ggplot(mapping=aes(y=Date1,x=Crime_count,color=G150))+
+  geom_point() +
+  scale_color_manual(values = c("black", "red"))
+
+
+
+```
+
+```{r Accident Date}
+
+Accident%>%
+mutate(Date=as.Date(Date,tryFormats = c("%m/%d/%y")))->a
+ 
+
+
+a$Date1 <- format(as.Date(a$Date), "%Y/%m")
+a$Date1<-sub("$","/01",a$Date1)
+
+as.Date(a$Date1,tryFormats = c("%Y/%m/%d") )
+
+
+a%>%
+  group_by(Date1)%>%
+  mutate(Accident_count = n()) %>%
+  ungroup() %>%
+  dplyr::select(Date1, Accident_count) %>%
+  unique() ->a
+
+
+
+a%>%
+mutate(G150=as.factor(if_else(Accident_count>150,"More","Less"))) %>%
+  filter(Date1<"2021/01/01", Date1>"2017/12/31")%>%
+ggplot(mapping=aes(y=Date1,x=Accident_count,color=G150))+
+  geom_point() +
+  scale_color_manual(values = c("black", "red"))
+  
+```
+
+
+

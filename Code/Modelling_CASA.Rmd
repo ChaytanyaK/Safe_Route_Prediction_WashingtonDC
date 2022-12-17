@@ -1,0 +1,53 @@
+---
+title: "Modelling_CASA"
+author: "Chaytanya Kumar"
+date: "2022-12-02"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(car)
+library(tidyverse)
+Accident<-read_csv("/Users/chaytanya/Documents/Analytics /Accident_18_20.csv")
+head(Accident)
+
+
+Accident%>%
+  mutate(Severity=if_else(Severity=='1',0,1))%>%
+  mutate(D)->Accident
+```
+
+
+```{r}
+model<-glm(Severity~Side+Weather_Condition+Sunrise_Sunset+Traffic_Signal+Crossing, family=binomial(link="logit"), data=Accident)
+summary(model)
+car::vif(model)
+
+```
+
+
+##Variable selection: 
+
+`
+```{r}
+log.odds <- coef(model) # Extract the log-odds coefficients
+odds <- exp(log.odds) # Convert the log-odds to odds print
+print(cbind("Log-Odds" = log.odds,"Odds" = odds),digits = 2)
+```
+
+## Interpretation:
+#The variables "Side", "Weather condition" (Cloudy), "DayParting"(Night) and "Traffic Signa"l(True) are highly significant as p-value < 0.05. 
+
+While variables "Fog", "Snow" and "Crossing" are  significant as well(at alpha =0.10) 
+
+On average, holding everything else constant, when the Side changes from Left to Right, the odds of High Severity increases  by a factor of 1.41(or increases by 41%).
+
+On average, holding everything else constant, when the Weather changes from clear to Cloudy, the odds of High Severity increases  by 1.31(increase by a 31%).
+
+On average, holding everything else constant, when the Day Parting changes from Day to Night, the odds of High Severity increases  by 1.62(increases by 62%).
+
+On average,holding everything else constant, when the Traffic  Signal is present on the sight, the odds of High Severity decrease by  a factor of 0.56 (decreases by 44%).
+
+
+
